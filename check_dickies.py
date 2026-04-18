@@ -353,6 +353,61 @@ footer {
   margin-bottom: 16px;
 }
 
+.card img { cursor: zoom-in; transition: opacity 0.15s; }
+.card img:hover { opacity: 0.85; }
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.94);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+  cursor: zoom-out;
+  padding: 40px 20px;
+  -webkit-tap-highlight-color: transparent;
+}
+.lightbox.open { opacity: 1; pointer-events: auto; }
+.lightbox img {
+  max-width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.lightbox-caption {
+  text-align: center;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  font-weight: 500;
+  max-width: 90%;
+}
+.lightbox-caption strong {
+  display: block;
+  color: var(--amber);
+  font-size: 14px;
+  letter-spacing: 0.15em;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 24px;
+  color: var(--text-dim);
+  line-height: 1;
+}
+
 @media (max-width: 520px) {
   .card { grid-template-columns: 60px 1fr; gap: 12px; }
   .card img { width: 60px; height: 60px; }
@@ -385,6 +440,9 @@ def render_card(item, on_sale, in_stock):
     code_esc = html.escape(item['code'].upper())
     url_esc = html.escape(item['url'], quote=True)
     img_esc = html.escape(item.get('image', ''), quote=True)
+    # Larger image for the lightbox — swap the card's _400x size suffix for _1024x
+    img_large = item.get('image', '').replace('_400x', '_1024x')
+    img_large_esc = html.escape(img_large, quote=True)
 
     price_block = f'<span class="price-current">${med["price"]:.2f}</span>'
     if med['price'] < REGULAR_PRICE:
@@ -396,7 +454,7 @@ def render_card(item, on_sale, in_stock):
 
     return f'''
     <div class="{' '.join(classes)}">
-      <img src="{img_esc}" alt="{color_esc}" loading="lazy">
+      <img src="{img_esc}" data-large="{img_large_esc}" data-color="{color_esc}" data-code="{code_esc}" alt="{color_esc}" loading="lazy">
       <div class="card-info">
         <div class="card-color">{color_esc}</div>
         <div class="card-code">{code_esc}</div>
@@ -503,10 +561,48 @@ def render_html(results, timestamp_pacific):
   </details>
 
   <footer>
-    <div>Auto-updated every 4 hours · Regular price baseline ${REGULAR_PRICE:.2f}</div>
+    <div>Auto-updated daily · Regular price baseline ${REGULAR_PRICE:.2f}</div>
     <div>Data: dickies.com JSON-LD</div>
   </footer>
 </div>
+
+<div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="lightbox-close" aria-hidden="true">×</div>
+  <img src="" alt="">
+  <div class="lightbox-caption"></div>
+</div>
+
+<script>
+(function() {{
+  const lb = document.getElementById('lightbox');
+  const lbImg = lb.querySelector('img');
+  const lbCaption = lb.querySelector('.lightbox-caption');
+
+  function open(img) {{
+    lbImg.src = img.dataset.large || img.src;
+    lbImg.alt = img.alt;
+    lbCaption.innerHTML = '<strong>' + img.dataset.color + '</strong>' + (img.dataset.code || '');
+    lb.classList.add('open');
+    lb.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }}
+  function close() {{
+    lb.classList.remove('open');
+    lb.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    // Clear src after animation ends to free memory
+    setTimeout(() => {{ if (!lb.classList.contains('open')) lbImg.src = ''; }}, 300);
+  }}
+
+  document.querySelectorAll('.card img').forEach(img => {{
+    img.addEventListener('click', () => open(img));
+  }});
+  lb.addEventListener('click', close);
+  document.addEventListener('keydown', e => {{
+    if (e.key === 'Escape' && lb.classList.contains('open')) close();
+  }});
+}})();
+</script>
 </body>
 </html>
 '''
