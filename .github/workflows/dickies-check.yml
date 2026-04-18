@@ -2,8 +2,9 @@ name: Dickies Size M Dashboard
 
 on:
   schedule:
-    # Every 4 hours. GitHub may delay scheduled runs up to ~15 min under load.
-    - cron: '0 */4 * * *'
+    # Once daily at 15:00 UTC = 8am PDT / 7am PST. Adjust if you prefer a
+    # different time. GitHub may delay scheduled runs up to ~15 min under load.
+    - cron: '0 15 * * *'
   workflow_dispatch: # lets you trigger manually from the Actions tab
 
 permissions:
