@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# =============================================================================
+# VERSION: v2 (2026-04-18) — adds image lightbox + daily schedule
+# If the footer on the live site shows "v2" you're on this version.
+# =============================================================================
 """
 Dickies WS450H Size M Dashboard Generator
 
@@ -514,6 +518,9 @@ def render_html(results, timestamp_pacific):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#0a0a0b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -562,7 +569,7 @@ def render_html(results, timestamp_pacific):
 
   <footer>
     <div>Auto-updated daily · Regular price baseline ${REGULAR_PRICE:.2f}</div>
-    <div>Data: dickies.com JSON-LD</div>
+    <div>Data: dickies.com JSON-LD · <strong>Build v2</strong></div>
   </footer>
 </div>
 
