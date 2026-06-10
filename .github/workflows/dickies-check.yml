@@ -1,21 +1,17 @@
 # =============================================================================
-# VERSION: v2 (2026-04-18) — switched from every-4-hours to once-daily schedule
+# VERSION: v3 (2026-06-09) — manual runs only, no schedule
 # =============================================================================
 name: Dickies Size M Dashboard
 
 on:
-  schedule:
-    # Once daily at 15:00 UTC = 8am PDT / 7am PST. Adjust if you prefer a
-    # different time. GitHub may delay scheduled runs up to ~15 min under load.
-     - cron: '0 15 * * *'
-  workflow_dispatch: # lets you trigger manually from the Actions tab
+  workflow_dispatch: # the only way to trigger this — manual from Actions tab
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Serialize concurrent runs so a manual trigger doesn't fight the schedule
+# Serialize concurrent runs so a manual trigger doesn't fight itself
 concurrency:
   group: pages
   cancel-in-progress: false
